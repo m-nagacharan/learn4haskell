@@ -193,14 +193,14 @@ Evaluate the following expressions in GHCi and insert the answers. Try
 to guess first, what you will see.
 
 >>> [10, 2] ++ [3, 1, 5]
-[10, 2, 3, 1, 5]
+[10,2,3,1,5]
 
 >>> [] ++ [1, 4]  -- [] is an empty list
-[1, 4]
+[1,4]
 >>> 3 : [1, 2]
-[3, 1, 2]
+[3,1,2]
 >>> 4 : 2 : [5, 10]  -- prepend multiple elements
-[4, 2, 5, 10]
+[4,2,5,10]
 >>> [1 .. 10]  -- list ranges
 [1,2,3,4,5,6,7,8,9,10]
 
@@ -351,8 +351,9 @@ ghci> :l src/Chapter2.hs
 -}
 subList :: Int -> Int -> [a] -> [a]
 subList x y p
-  | x <0 || y<=0 || null p = []
-  | x < y && length p > y = take (y-x+1) (drop x p)
+  | x <0 || y<=0 || null p || x > y= []
+  | x < y && length p > y  = take (y-x+1) (drop x p)
+  | otherwise              = p
 
 {- |
 =⚔️= Task 4
@@ -748,7 +749,7 @@ value of the element itself
 🕯 HINT: Use combination of 'map' and 'replicate'
 -}
 smartReplicate :: [Int] -> [Int]
-smartReplicate l = error "smartReplicate: Not implemented!"
+smartReplicate = concatMap (\x -> replicate x x)
 
 {- |
 =⚔️= Task 9
@@ -761,7 +762,7 @@ the list with only those lists that contain a passed element.
 
 🕯 HINT: Use the 'elem' function to check whether an element belongs to a list
 -}
-contains x lis = filter (elem x) lis
+contains x  = filter (elem x) 
 
 {- |
 =🛡= Eta-reduction
@@ -863,7 +864,7 @@ list.
 -}
 rotate x [] = []
 rotate x li 
-  | x < 0     = li
+  | x < 0     = []
   | otherwise = take (length li) $drop x (cycle li)
 
 {- |
