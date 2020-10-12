@@ -351,9 +351,8 @@ ghci> :l src/Chapter2.hs
 -}
 subList :: Int -> Int -> [a] -> [a]
 subList x y p
-  | x <0 || y<=0 || null p || x > y= []
-  | x < y && length p > y  = take (y-x+1) (drop x p)
-  | otherwise              = p
+  | x <0 || y<0 || null p || x > y= []
+  | otherwise  = take (y-x+1) (drop x p)
 
 {- |
 =⚔️= Task 4
