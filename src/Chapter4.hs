@@ -294,8 +294,9 @@ values and apply them to the type level?
 instance Functor (Secret e) where
     fmap :: (a -> b) -> Secret e a -> Secret e b
     fmap f (Reward a) = Reward (f a)
+    fmap f (Trap e) = Trap e
 
-{- |
+{- |f
 =⚔️= Task 3
 
 Implement Functor instance for the "List" type defined below. This
@@ -306,6 +307,12 @@ typeclasses for standard data types.
 data List a
     = Empty
     | Cons a (List a)
+
+instance Functor (List a) where
+    fmap :: (a -> b) -> List a -> List b
+    fmap f (Cons a (List a)) = Cons f a (fmap (List a))
+    fmap _ Empty = Empty
+  
 
 {- |
 =🛡= Applicative
