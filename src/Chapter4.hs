@@ -308,9 +308,9 @@ data List a
     = Empty
     | Cons a (List a)
 
-instance Functor (List a) where
+instance Functor List where
     fmap :: (a -> b) -> List a -> List b
-    fmap f (Cons a (List a)) = Cons f a (fmap (List a))
+    fmap f (Cons x xs) = Cons (f x) (fmap f xs)
     fmap _ Empty = Empty
   
 
@@ -479,10 +479,10 @@ Implement the Applicative instance for our 'Secret' data type from before.
 -}
 instance Applicative (Secret e) where
     pure :: a -> Secret e a
-    pure = error "pure Secret: Not implemented!"
+    pure x =  Reward x
 
     (<*>) :: Secret e (a -> b) -> Secret e a -> Secret e b
-    (<*>) = error "(<*>) Secret: Not implemented!"
+    (<*>) (Reward f) (Reward x) = Reward (f x)
 
 {- |
 =⚔️= Task 5
@@ -495,6 +495,19 @@ Implement the 'Applicative' instance for our 'List' type.
   may also need to implement a few useful helper functions for our List
   type.
 -}
+
+
+instance Functor List where
+    fmap :: (a -> b) -> List a -> List b
+    fmap f (Cons x xs) = Cons (f x) (fmap f xs)
+    fmap _ Empty = Empty
+
+instance Applicative List where
+    pure :: a -> List a
+    pure x = Cons x []
+
+    (<*>) :: List (a -> b) -> List a -> List b
+    (<*>) (List f) (Cons x xs) = Cons (f x) (f xs)
 
 
 {- |
