@@ -483,6 +483,8 @@ instance Applicative (Secret e) where
 
     (<*>) :: Secret e (a -> b) -> Secret e a -> Secret e b
     (<*>) (Reward f) (Reward x) = Reward (f x)
+    (<*>) (Trap e) _ = Trap e
+    (<*>) (Reward f) (Trap e) = Trap e
 
 {- |
 =⚔️= Task 5
@@ -497,18 +499,21 @@ Implement the 'Applicative' instance for our 'List' type.
 -}
 
 
-instance Functor List where
-    fmap :: (a -> b) -> List a -> List b
-    fmap f (Cons x xs) = Cons (f x) (fmap f xs)
-    fmap _ Empty = Empty
+-- instance Functor List where
+--     fmap :: (a -> b) -> List a -> List b
+--     fmap f (Cons x xs) = Cons (f x) (fmap f xs)
+--     fmap _ Empty = Empty
 
 instance Applicative List where
     pure :: a -> List a
-    pure x = Cons x []
+    pure x = Cons x Empty
 
     (<*>) :: List (a -> b) -> List a -> List b
-    (<*>) (List f) (Cons x xs) = Cons (f x) (f xs)
+    (<*>) (Cons f fs) l =  (fmap f l) <++> ( fs <*> l)
 
+(<++>) :: List a -> List a -> List a
+(<++>) Empty ys = ys
+(<++>) (Cons x xs) ys = Cons x (xs <++> ys)
 
 {- |
 =🛡= Monad
@@ -620,7 +625,8 @@ Implement the 'Monad' instance for our 'Secret' type.
 -}
 instance Monad (Secret e) where
     (>>=) :: Secret e a -> (a -> Secret e b) -> Secret e b
-    (>>=) = error "bind Secret: Not implemented!"
+    (>>=) (Reward x) f = f x 
+    (>>=) (Trap e) f = (Trap e)
 
 {- |
 =⚔️= Task 7
@@ -630,6 +636,16 @@ Implement the 'Monad' instance for our lists.
 🕯 HINT: You probably will need to implement a helper function (or
   maybe a few) to flatten lists of lists to a single list.
 -}
+
+
+instance Monad List where
+    (>>=) :: List a -> (a -> List b) -> List b
+    (>>=) (Cons x xs) f =  f x <==> ( xs >>= f)
+
+(<==>) :: List a -> List a -> List a
+(<==>) Empty ys = ys
+(<==>) (Cons x xs) ys = Cons x (xs <++> ys)
+
 
 
 {- |
@@ -649,8 +665,7 @@ Can you implement a monad version of AND, polymorphic over any monad?
 🕯 HINT: Use "(>>=)", "pure" and anonymous function
 -}
 andM :: (Monad m) => m Bool -> m Bool -> m Bool
-andM = error "andM: Not implemented!"
-
+andM ma mb = ma >>= \a -> if a then mb else pure False
 {- |
 =🐉= Task 9*: Final Dungeon Boss
 
@@ -692,6 +707,25 @@ Specifically,
    subtree of a tree
  ❃ Implement the function to convert Tree to list
 -}
+
+data Tree a 
+      = Leaf
+      | Node a (Tree a) (Tree a)
+
+
+instance Functor Tree where
+    fmap :: (a -> b) -> Tree a -> Tree b
+    fmap f (Node a t1 t2) = (Node f a) (fmap t1) (fmap t2)
+    fmap f Leaf = Leaf
+
+reversetree :: Tree a -> Tree a
+reversetree (Node a t1 t2) = Node a (reversetree t2)  (reversetree t1)
+
+
+treetolist :: Tree a -> [a]
+treetolist (Node a t1 t2) = a : (treetolist t1) ++ (treetolist t2)
+treetolist Leaf = []
+  
 
 
 {-
